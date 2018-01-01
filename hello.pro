@@ -7,6 +7,7 @@
 QT       += core gui
 
 QT       += serialport
+QT       += testlib
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = hello
@@ -25,8 +26,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    ymodem.cpp \
+    osapi/Thread_Win32.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    ymodem.h \
+    osapi/Thread.h
 
 FORMS    += mainwindow.ui

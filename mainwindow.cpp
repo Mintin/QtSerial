@@ -2,6 +2,10 @@
 #include "ui_mainwindow.h"
 #include "QMessageBox"
 #include "QDebug"
+#include <QFile>
+#include <QDir>
+#include <QFileDialog>
+#include "ymodem.h"
 
 bool  hexStatus=false;
 
@@ -10,8 +14,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+   // qInstallMsgHandler(customMessageHandler);
     initPort();
-
+    connect(ui->openFill, SIGNAL(clicked(bool)), this, SLOT(openFile()));
+    connect(ui->updata, SIGNAL(clicked(bool)), this, SLOT(upData()));
       //paint.setColor(Color.rgb(0,173,173));
      //ui->textEdit->setStyleSheet("background-color:black;");
   //  ui->textEdit->setTextColor(QColor(200, 200, 200));
@@ -163,8 +169,6 @@ void MainWindow::on_clearButton_clicked()
       }
   }
 
-
-
 //  void MainWindow::on_openButton_clicked()
   void MainWindow::initPort()
   {
@@ -192,13 +196,11 @@ void MainWindow::on_clearButton_clicked()
          QStringList dataBitsList;//数据位
          QStringList stopBitsList;//停止位
 
-            baudList<<"50"<<"75"<<"100"<<"134"<<"150"<<"200"<<"300"
-                  <<"600"<<"1200"<<"1800"<<"2400"<<"4800"<<"9600"
-                  <<"14400"<<"19200"<<"38400"<<"56000"<<"57600"
-                 <<"76800"<<"115200"<<"128000"<<"256000";
+            baudList<<"1200"<<"2400"<<"4800"<<"9600"<<"14400"<<"19200"<<"38400"
+                   <<"56000"<<"57600"<<"76800"<<"115200"<<"128000"<<"256000";
 
               ui->BaudBox->addItems(baudList);
-              ui->BaudBox->setCurrentIndex(12);
+              ui->BaudBox->setCurrentIndex(3);
 
                 parityList<<"无"<<"奇"<<"偶";
                 parityList<<"标志";
@@ -214,12 +216,45 @@ void MainWindow::on_clearButton_clicked()
                  ui->StopBox->addItems(stopBitsList);
                   ui->StopBox->setCurrentIndex(0);
  connect(ui->checkBox, SIGNAL(stateChanged(int)), this, SLOT(hexShow()));
-                      //设置按钮可以被按下
-                    //  ui->btnOpen->setCheckable(true);
-
 
   }
+   void MainWindow::WriteSerial(unsigned char *data,int len )
+   {
 
+          serial->write((char*)data,len);
 
+   }
+
+  void MainWindow::openFile()
+{
+
+      //PathUp="Hello World";
+      //updatPath  QString  FilePath
+     PathUp= QFileDialog::getOpenFileName(this, tr("Open File"),QDir::currentPath(),tr("ALL Files (*.*)"));
+     if (PathUp.isEmpty())
+              return;
+     ui->BaudBox->setCurrentIndex(10);
+   // PathUp = QFileDialog::getOpenFileName(this, tr("Open File"),QDir::currentPath(),tr("ALL Files (*.*)"));
+   //
+    qDebug()<<"file Path:"<<PathUp;
+  }
+  void MainWindow::upData()
+ {
+    // char path[50]={0};
+      Ymodem myYmdem;
+      QByteArray Path=PathUp.toLatin1();
+      myYmdem.getFilePath(Path.data());
+      myYmdem.YmodeInfo();
+    //  myYmdem.file_Pack();
+    // myYmdem.sendOver();
+      //myYmdem.sendOver();
+      //  myYmdem->getFilePath();
+
+       //char *pp=Path.data();
+     // myYmdem.getFilePath();//qs_data.ascii();
+
+     // qDebug()<<"upData Push"<<Path.data();
+
+  }
 
 

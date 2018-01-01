@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+
+
 #include <QMainWindow>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
@@ -14,7 +16,9 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    ~MainWindow(); 
+ void  WriteSerial(unsigned char *date,int len );
+   QSerialPort *serial;
 public slots:
     void initPort();
    // char CharToHex(char ch);
@@ -23,9 +27,13 @@ public slots:
     void on_openButton_clicked();
     void Read_Data();
     void hexShow();
+    void openFile();
+    void upData();
+
 private:
     Ui::MainWindow *ui;
-    QSerialPort *serial;
+
+     QString PathUp;
 };
 
 #endif // MAINWINDOW_H
