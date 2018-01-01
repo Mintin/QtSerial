@@ -99,18 +99,6 @@ void MainWindow::on_clearButton_clicked()
           ui->textEdit->moveCursor(QTextCursor::End);
           ui->textEdit->insertPlainText(buf);
 
-          //QString str = ui->textEdit->toPlainText();
-
-        //  QTextEdit *textEdit = new QTextEdit("A",this);
-        //  textEdit->moveCursor(QTextCursor::End);
-        //  textEdit->insertPlainText("B");
-         // str+=tr(buf.toHex());
-         // ui->textEdit->clear();
-           //ui->textEdit->addAction(&str);
-          // str.toHex();
-       //  ui->textEdit->append(&CharToHex(str));
-         // ui->textEdit->append(str);
-          //CharToHex
       }
       buf.clear();
   }
