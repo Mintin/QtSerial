@@ -17,10 +17,12 @@ public:
     ~MainWindow();
 public slots:
     void initPort();
+   // char CharToHex(char ch);
     void on_clearButton_clicked();
     void on_sendButton_clicked();
     void on_openButton_clicked();
     void Read_Data();
+    void hexShow();
 private:
     Ui::MainWindow *ui;
     QSerialPort *serial;

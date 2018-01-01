@@ -3,12 +3,21 @@
 #include "QMessageBox"
 #include "QDebug"
 
+bool  hexStatus=false;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     initPort();
+
+      //paint.setColor(Color.rgb(0,173,173));
+     //ui->textEdit->setStyleSheet("background-color:black;");
+  //  ui->textEdit->setTextColor(QColor(200, 200, 200));
+
+    //  connect(ui->checkBox,SIGNAL(signal()),receiver,SLOT(slot()));
+
    /*
     foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
        {
@@ -34,6 +43,34 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+
+void MainWindow::hexShow()
+{
+    if(ui->checkBox->checkState()== Qt::Checked)//Unchecked
+    {
+
+   hexStatus=true;
+    qDebug()<<"CheckBox is Checked";
+    }
+  else
+ {  hexStatus=false;
+    qDebug()<<"CheckBox is Unchecked";
+    }
+
+    //bool  hexStatus=false;
+/*
+radioButton->setChecked(true);
+//返回选择状态
+bool radio_sel = radioButton->isChecked();
+*/
+// qDebug()<<"CheckBox is push";
+
+
+
+}
+
+
 void MainWindow::on_clearButton_clicked()
 {
     ui->textEdit->clear();
@@ -47,13 +84,33 @@ void MainWindow::on_clearButton_clicked()
   void MainWindow::Read_Data()
   {
       QByteArray buf;
-      buf = serial->readAll();
+     // unsigned char data[20];
+
+      buf= serial->readAll();
+
       if(!buf.isEmpty())
       {
-          QString str = ui->textEdit->toPlainText();
-          str+=tr(buf);
-          ui->textEdit->clear();
-          ui->textEdit->append(str);
+
+          if(hexStatus==true)
+          {
+            buf=buf.toHex();
+          }
+
+          ui->textEdit->moveCursor(QTextCursor::End);
+          ui->textEdit->insertPlainText(buf);
+
+          //QString str = ui->textEdit->toPlainText();
+
+        //  QTextEdit *textEdit = new QTextEdit("A",this);
+        //  textEdit->moveCursor(QTextCursor::End);
+        //  textEdit->insertPlainText("B");
+         // str+=tr(buf.toHex());
+         // ui->textEdit->clear();
+           //ui->textEdit->addAction(&str);
+          // str.toHex();
+       //  ui->textEdit->append(&CharToHex(str));
+         // ui->textEdit->append(str);
+          //CharToHex
       }
       buf.clear();
   }
@@ -168,20 +225,13 @@ void MainWindow::on_clearButton_clicked()
                  stopBitsList<<"2";
                  ui->StopBox->addItems(stopBitsList);
                   ui->StopBox->setCurrentIndex(0);
-
+ connect(ui->checkBox, SIGNAL(stateChanged(int)), this, SLOT(hexShow()));
                       //设置按钮可以被按下
                     //  ui->btnOpen->setCheckable(true);
 
 
-
-
-
-
-
-
-
-
-
   }
+
+
 
 
