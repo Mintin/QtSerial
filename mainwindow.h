@@ -31,9 +31,9 @@ public slots:
     void upData();
 
 private:
-    Ui::MainWindow *ui;
-
+     Ui::MainWindow *ui;
      QString PathUp;
+     char fileName[30];
 };
 
 #endif // MAINWINDOW_H

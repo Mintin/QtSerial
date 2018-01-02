@@ -25,13 +25,14 @@ public:
     void YmodeInfo(uint8_t *data,int *len);
     void file_Pack(uint8_t *data,int *len);
     void sendOver(uint8_t *data,int *len);
-    void getFilePath(char *path);
+    void getFilePath(char *path,char *name);
     void WriteSerial(uint8_t * Pack,int len);
     void YmodemStart(char *path);
     void YmodemStop(void);
 private:
     char * filePath;
-   class MainWindow *Serial;
+    char  fileName[30];
+   //class MainWindow *Serial;
 
 };
 

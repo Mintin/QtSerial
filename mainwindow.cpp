@@ -20,7 +20,6 @@ MainWindow::MainWindow(QWidget *parent) :
      ui->sendButton->setEnabled(false);
         ui->openFill->setEnabled(false);
         ui->updata->setEnabled(false);
-
     connect(ui->openFill, SIGNAL(clicked(bool)), this, SLOT(openFile()));
     connect(ui->updata, SIGNAL(clicked(bool)), this, SLOT(upData()));
       //paint.setColor(Color.rgb(0,173,173));
@@ -94,27 +93,19 @@ void MainWindow::on_clearButton_clicked()
 
   void MainWindow::Read_Data()
   {
-      QByteArray buf;
-      //char ch;
-     // unsigned char data[20];
 
-      buf= serial->readAll();
-      //buf=
-          //    serial->readData(&ch,1)
-      if(!buf.isEmpty())
-      {
 
+    QString myStrTemp;
+    QByteArray  buf= serial->readAll();
+     if(buf.isEmpty()) return;
           if(hexStatus==true)
           {
             buf=buf.toHex();
           }
-
+          myStrTemp=QString::fromLocal8Bit( buf );
           ui->textEdit->moveCursor(QTextCursor::End);
-          ui->textEdit->insertPlainText(buf);
-          //ui->textEdit->insertPlainText(" ");
-
-      }
-      buf.clear();
+          ui->textEdit->insertPlainText(myStrTemp);
+          buf.clear();
   }
 
   void MainWindow::on_openButton_clicked()
@@ -129,6 +120,13 @@ void MainWindow::on_clearButton_clicked()
           //设置波特率
           serial->setBaudRate(ui->BaudBox->currentText().toInt());
           //设置数据位数
+          serial->setBaudRate(9600);   //设置波特率
+          serial->setDataBits(QSerialPort::Data8);     //设置数据位
+          serial->setStopBits(QSerialPort::OneStop);     //设置停止位
+          serial->setParity(QSerialPort::NoParity);     //设置校验位
+          serial->setFlowControl(QSerialPort::NoFlowControl);//设置流控制
+
+          /*
           switch(ui->BitNumBox->currentIndex())
           {
           case 8: serial->setDataBits(QSerialPort::Data8); break;
@@ -149,6 +147,11 @@ void MainWindow::on_clearButton_clicked()
           }
           //设置流控制
           serial->setFlowControl(QSerialPort::NoFlowControl);
+          */
+               //serial->setBaudRate()
+               // QSerialPort::
+
+                //serial->setTimeout(500);         //设置超时时间
           //关闭设置菜单使能
           ui->PortBox->setEnabled(false);
           ui->BaudBox->setEnabled(false);
@@ -240,12 +243,31 @@ void MainWindow::on_clearButton_clicked()
   void MainWindow::openFile()
 {
 
+     QString  fileName;
+     QByteArray  tempName; // = str.toLatin1();
+
       //PathUp="Hello World";
       //updatPath  QString  FilePath
      PathUp= QFileDialog::getOpenFileName(this, tr("Open File"),QDir::currentPath(),tr("ALL Files (*.*)"));
-     if (PathUp.isEmpty())
-              return;
+     if (PathUp.isEmpty())     return;
+     QFileInfo fileInfo(PathUp);
+     fileName=fileInfo.fileName();
+     tempName=fileName.toLatin1();
+     strcpy(this->fileName,tempName.data());
      ui->BaudBox->setCurrentIndex(10);
+/*
+
+    QString str = “hello”; //QString转char *
+     QByteArray ba = str.toLatin1();
+    char *mm = ba.data();
+
+*/
+
+
+
+     //QString fpath = QFileDialog::FileName();
+    // qDebug()<<"File Name:"<<fileName;
+
    // PathUp = QFileDialog::getOpenFileName(this, tr("Open File"),QDir::currentPath(),tr("ALL Files (*.*)"));
    //
   //  qDebug()<<"file Path:"<<PathUp;
@@ -256,13 +278,24 @@ void MainWindow::on_clearButton_clicked()
         uint8_t TxData[1024+10]={0};
         QByteArray Path=PathUp.toLatin1();
         Ymodem myYmdem;
-        myYmdem.getFilePath(Path.data());
+        myYmdem.getFilePath(Path.data(),this->fileName);
         myYmdem.YmodeInfo(TxData,&TxLen);
         serial->write((char*)TxData,TxLen);
-        myYmdem.file_Pack(TxData,&TxLen);
-        serial->write((char*)TxData,TxLen);
-        myYmdem.sendOver(TxData,&TxLen);
-        serial->write((char*)TxData,TxLen);
+
+  //     qDebug()<<"upData:"<<this->fileName;
+      //  serial->write((char*)TxData,TxLen);
+     /*   for(int i=0;i<TxLen;i++)
+        {
+            printf("%02X ",TxData[i]);
+        }
+*/
+        //printf("Hello World \r\n");
+        //std::cout <<"%02x "<<TxData;
+        //qDebug<<"%02X"
+       // myYmdem.file_Pack(TxData,&TxLen);
+       // serial->write((char*)TxData,TxLen);
+       // myYmdem.sendOver(TxData,&TxLen);
+       // serial->write((char*)TxData,TxLen);
 
 
        //myYmdem.YmodemStart(Path.data());

@@ -9,41 +9,6 @@
 //extern MainWindow w;
 char upPath[128]={0};
 
-class myThread : public OS_Thread
-{
-  private:
-    // 线程主函数
-    virtual int Routine()
-    {
-
-         Ymodem myYmdem;
-         myYmdem.getFilePath(upPath);
-         //myYmdem.YmodeInfo();
-
-
-
-
-
-     qDebug()<<"myThread:"<<upPath;
-
-
-
-        /*
-        while(1)
-        {
-            qDebug()<<"A Thread is Running";
-            //printf("A Thread is Running \r\n");
-            OS_Thread::Msleep(1500);
-        }
-*/
-        return 0; // 正常退出
-    }
-
-public:
-    bool m_quitflag;
-
-};
-
 
  Ymodem::Ymodem()
 {
@@ -111,14 +76,18 @@ public:
          }
          return crc;
  }
- void Ymodem::getFilePath(char *path)
+ void Ymodem::getFilePath(char *path,char* name)
  {
 
      this->filePath=path;
+     strcpy(this->fileName,name);
+     //this->fileName=name;
+    // qDebug()<<" getFilePath:"<<this->fileName;
 
  }
  void Ymodem::YmodeInfo(uint8_t *data,int *len)
  { int fileSize=0;
+     int fileLen=0;
    char	NameStr[20]={0};
    uint32_t CRC=0;
    uint8_t finfo[_RYM_SOH_PKG_SZ] ={0};
@@ -126,19 +95,23 @@ public:
    finfo[1]=0x00;
    finfo[2]=0xFF;
    fileSize=getFileSize(filePath);
-   memcpy(finfo+3,filePath,sizeof(filePath));
-   //printf("fileName : %d",sizeof(fileName));
-     _itoa(fileSize,NameStr,10);
-     memcpy(&finfo[3+sizeof(filePath)],NameStr,20);
-     CRC= crc16(finfo+3,128);
-     finfo[_RYM_SOH_PKG_SZ-1]=(uint8_t)CRC;
-     finfo[_RYM_SOH_PKG_SZ-2]=(uint8_t)(CRC>>8);
+   fileLen=strlen(this->fileName)+1;
+   memcpy(finfo+3,this->fileName,fileLen);
+   printf("fileName len : %d",sizeof(this->fileName));
+    _itoa(fileSize,NameStr,10);
+    memcpy(&finfo[3+fileLen],NameStr,20);
+    CRC= crc16(finfo+3,128);
+    finfo[_RYM_SOH_PKG_SZ-1]=(uint8_t)CRC;
+    finfo[_RYM_SOH_PKG_SZ-2]=(uint8_t)(CRC>>8);
+    //printf("Path: %s \r\n",filePath);
     //   itoa(getFileSize(fileName),NameStr,10);
      //  printf("NameStr: %s \r\n",NameStr);
     //printf("CRC: %04X \r\n",CRC);
-     WriteSerial(finfo,_RYM_SOH_PKG_SZ);
+     //WriteSerial(finfo,_RYM_SOH_PKG_SZ);
      memcpy(data,finfo,_RYM_SOH_PKG_SZ);
      *len=_RYM_SOH_PKG_SZ;
+
+     //printf("YmodeInfo: %s \r\n",this->fileName);
 
  }
  void Ymodem::sendOver(uint8_t *data,int *len)
@@ -155,6 +128,9 @@ public:
      buf[_RYM_SOH_PKG_SZ-2]=(uint8_t)(CRC>>8);
      memcpy(data,buf,_RYM_SOH_PKG_SZ);
      *len=_RYM_SOH_PKG_SZ;
+     WriteSerial(buf,_RYM_SOH_PKG_SZ);
+
+
       // WriteSerial(buf,_RYM_SOH_PKG_SZ);
 
   }
