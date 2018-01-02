@@ -22,12 +22,12 @@ class Ymodem
 {
 public:
         Ymodem();
-    void YmodeInfo();
-    void file_Pack();
-    void sendOver();
+    void YmodeInfo(uint8_t *data,int *len);
+    void file_Pack(uint8_t *data,int *len);
+    void sendOver(uint8_t *data,int *len);
     void getFilePath(char *path);
     void WriteSerial(uint8_t * Pack,int len);
-    void YmodemStart(void);
+    void YmodemStart(char *path);
     void YmodemStop(void);
 private:
     char * filePath;

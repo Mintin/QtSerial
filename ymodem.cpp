@@ -6,8 +6,43 @@
 #include "mainwindow.h"
 #include "osapi/Thread.h"
 //#define  yprintf(X)     QDebug()<<"X"
-
 //extern MainWindow w;
+char upPath[128]={0};
+
+class myThread : public OS_Thread
+{
+  private:
+    // 线程主函数
+    virtual int Routine()
+    {
+
+         Ymodem myYmdem;
+         myYmdem.getFilePath(upPath);
+         //myYmdem.YmodeInfo();
+
+
+
+
+
+     qDebug()<<"myThread:"<<upPath;
+
+
+
+        /*
+        while(1)
+        {
+            qDebug()<<"A Thread is Running";
+            //printf("A Thread is Running \r\n");
+            OS_Thread::Msleep(1500);
+        }
+*/
+        return 0; // 正常退出
+    }
+
+public:
+    bool m_quitflag;
+
+};
 
 
  Ymodem::Ymodem()
@@ -18,23 +53,23 @@
  void Ymodem::WriteSerial(uint8_t * Pack,int len)
   {
      FILE* fp;
-      MainWindow serial;
+     // MainWindow serial;
          char buf[10]={0};
           fp=fopen("SerialLog.txt","a");
           if (fp==0) { printf("can't open file Creat file \n");
           }
             for(int k=0;k<len;k++)
             {
-                printf("%02X ",Pack[k]);
+                //printf("%02X ",Pack[k]);
                 sprintf(buf,"%02X ",Pack[k]);
             //	fwrite(buf,sizeof(unsigned char),1,fp);
                 fputs(buf,fp);
             }
             fputs("\r\n>>>>>>>>>>>>\r\n",fp);
-            printf(">>>>>>>>>>>>>>>>\r\n");
+         //   printf(">>>>>>>>>>>>>>>>\r\n");
 
              fclose(fp);
-          //   serial.WriteSerial(Pack,len);
+              // serial.WriteSerial(Pack,len);
             // Serial->WriteSerial(Pack,len);
       //       Serial->serial->write((char*)Pack,len);
            //Serial->write((char*)Pack,len);
@@ -82,7 +117,7 @@
      this->filePath=path;
 
  }
- void Ymodem::YmodeInfo()
+ void Ymodem::YmodeInfo(uint8_t *data,int *len)
  { int fileSize=0;
    char	NameStr[20]={0};
    uint32_t CRC=0;
@@ -101,9 +136,12 @@
     //   itoa(getFileSize(fileName),NameStr,10);
      //  printf("NameStr: %s \r\n",NameStr);
     //printf("CRC: %04X \r\n",CRC);
-   WriteSerial(finfo,_RYM_SOH_PKG_SZ);
+     WriteSerial(finfo,_RYM_SOH_PKG_SZ);
+     memcpy(data,finfo,_RYM_SOH_PKG_SZ);
+     *len=_RYM_SOH_PKG_SZ;
+
  }
- void Ymodem::sendOver(void)
+ void Ymodem::sendOver(uint8_t *data,int *len)
  {
      uint32_t CRC=0;
      uint8_t zero=0;
@@ -115,10 +153,13 @@
      CRC= crc16(buf+3,128);
      buf[_RYM_SOH_PKG_SZ-1]=(uint8_t)CRC;
      buf[_RYM_SOH_PKG_SZ-2]=(uint8_t)(CRC>>8);
-       WriteSerial(buf,_RYM_SOH_PKG_SZ);
+     memcpy(data,buf,_RYM_SOH_PKG_SZ);
+     *len=_RYM_SOH_PKG_SZ;
+      // WriteSerial(buf,_RYM_SOH_PKG_SZ);
+
   }
 
- void Ymodem::file_Pack()
+ void Ymodem::file_Pack(uint8_t *data,int *len)//(uint8_t *data,int &len);
  {
      FILE * ffile;
      int packHead=2;
@@ -159,8 +200,12 @@
        CRC= crc16(Pack+3,1024);
        Pack[_RYM_STX_PKG_SZ-1]=(uint8_t)CRC;
         Pack[_RYM_STX_PKG_SZ-2]=(uint8_t)(CRC>>8);
-        WriteSerial(Pack,_RYM_STX_PKG_SZ);
-         memset(Pack,0,_RYM_STX_PKG_SZ);
+         //WriteSerial(Pack,_RYM_STX_PKG_SZ);
+          //data=Pack;
+         memcpy(data,Pack,_RYM_STX_PKG_SZ);
+         *len=_RYM_STX_PKG_SZ;
+
+        // memset(Pack,0,_RYM_STX_PKG_SZ);
          //  memset(Pack,0,1024);
            WaiteaAsk();
      fclose(ffile);
@@ -168,31 +213,16 @@
  }
 
 
- class myThread : public OS_Thread
+
+ void Ymodem::YmodemStart(char *path)
  {
-   private:
-     // 线程主函数
-     virtual int Routine()
-     {
-         while(1)
-         {
-             qDebug()<<"A Thread is Running";
-             //printf("A Thread is Running \r\n");
-             OS_Thread::Msleep(1500);
-         }
-         return 0; // 正常退出
-     }
+     strcpy(upPath,path);
+    // myThread * UpThread=new myThread();
+     //strcpy(upPath,path);
+    // qDebug()<<"YmodemStart"<<path;
+     //memcpy(upPath,path,128);
 
- public:
-     bool m_quitflag;
-
- };
-
- void Ymodem::YmodemStart(void)
- {
-
-
-
+    // UpThread->Run();
 
  }
  void Ymodem::YmodemStop(void)

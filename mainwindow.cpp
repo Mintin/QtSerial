@@ -13,9 +13,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+
     ui->setupUi(this);
    // qInstallMsgHandler(customMessageHandler);
     initPort();
+     ui->sendButton->setEnabled(false);
+        ui->openFill->setEnabled(false);
+        ui->updata->setEnabled(false);
+
     connect(ui->openFill, SIGNAL(clicked(bool)), this, SLOT(openFile()));
     connect(ui->updata, SIGNAL(clicked(bool)), this, SLOT(upData()));
       //paint.setColor(Color.rgb(0,173,173));
@@ -90,10 +95,12 @@ void MainWindow::on_clearButton_clicked()
   void MainWindow::Read_Data()
   {
       QByteArray buf;
+      //char ch;
      // unsigned char data[20];
 
       buf= serial->readAll();
-
+      //buf=
+          //    serial->readData(&ch,1)
       if(!buf.isEmpty())
       {
 
@@ -104,6 +111,7 @@ void MainWindow::on_clearButton_clicked()
 
           ui->textEdit->moveCursor(QTextCursor::End);
           ui->textEdit->insertPlainText(buf);
+          //ui->textEdit->insertPlainText(" ");
 
       }
       buf.clear();
@@ -149,6 +157,8 @@ void MainWindow::on_clearButton_clicked()
           ui->StopBox->setEnabled(false);
           ui->openButton->setText(tr("关闭串口"));
           ui->sendButton->setEnabled(true);
+          ui->openFill->setEnabled(true);
+          ui->updata->setEnabled(true);
           //连接信号槽
           QObject::connect(serial, &QSerialPort::readyRead, this, &MainWindow::Read_Data);
       }
@@ -164,6 +174,8 @@ void MainWindow::on_clearButton_clicked()
           ui->BitNumBox->setEnabled(true);
           ui->ParityBox->setEnabled(true);
           ui->StopBox->setEnabled(true);
+          ui->openFill->setEnabled(false);
+          ui->updata->setEnabled(false);
           ui->openButton->setText(tr("打开串口"));
           ui->sendButton->setEnabled(false);
       }
@@ -236,15 +248,42 @@ void MainWindow::on_clearButton_clicked()
      ui->BaudBox->setCurrentIndex(10);
    // PathUp = QFileDialog::getOpenFileName(this, tr("Open File"),QDir::currentPath(),tr("ALL Files (*.*)"));
    //
-    qDebug()<<"file Path:"<<PathUp;
+  //  qDebug()<<"file Path:"<<PathUp;
   }
   void MainWindow::upData()
  {
-    // char path[50]={0};
-      Ymodem myYmdem;
-      QByteArray Path=PathUp.toLatin1();
-      myYmdem.getFilePath(Path.data());
-      myYmdem.YmodeInfo();
+        int TxLen=0;
+        uint8_t TxData[1024+10]={0};
+        QByteArray Path=PathUp.toLatin1();
+        Ymodem myYmdem;
+        myYmdem.getFilePath(Path.data());
+        myYmdem.YmodeInfo(TxData,&TxLen);
+        serial->write((char*)TxData,TxLen);
+        myYmdem.file_Pack(TxData,&TxLen);
+        serial->write((char*)TxData,TxLen);
+        myYmdem.sendOver(TxData,&TxLen);
+        serial->write((char*)TxData,TxLen);
+
+
+       //myYmdem.YmodemStart(Path.data());
+       //myYmdem.getFilePath(Path.data());
+
+
+
+
+    //  serial->write((char*)data,strlen(data));
+
+
+
+    // Ymodem myYmdem;
+    // QByteArray Path=PathUp.toLatin1();
+    // myYmdem.YmodemStart(Path.data());
+     //qDebug()<<"MainWindow-upData"<<Path.data();
+   //  char path[50]={0};
+    //  Ymodem myYmdem;
+     // QByteArray Path=PathUp.toLatin1();
+  //   myYmdem.getFilePath(Path.data());
+    //  myYmdem.YmodeInfo();
     //  myYmdem.file_Pack();
     // myYmdem.sendOver();
       //myYmdem.sendOver();
@@ -253,7 +292,8 @@ void MainWindow::on_clearButton_clicked()
        //char *pp=Path.data();
      // myYmdem.getFilePath();//qs_data.ascii();
 
-     // qDebug()<<"upData Push"<<Path.data();
+     qDebug()<<"upData Over";
+     printf("Hello ");
 
   }
 
