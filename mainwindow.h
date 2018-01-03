@@ -30,7 +30,7 @@ public slots:
     void openFile();
     void upData();
 
-private:
+public:
      Ui::MainWindow *ui;
      QString PathUp;
      char fileName[30];

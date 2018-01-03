@@ -6,8 +6,33 @@
 #include <QDir>
 #include <QFileDialog>
 #include "ymodem.h"
+#include <QThread>
+
 
 bool  hexStatus=false;
+
+/*
+class myThread :public QThread
+{
+public:
+    myThread(MainWindow *parent)
+    {
+
+    }
+    myThread()
+    {
+   //connect(this, SIGNAL(finished()),this, SLOT(deleteLater()));
+
+    }
+ private:
+    void run()
+    {
+      qDebug()<<"Hello myThread"<<endl;
+
+
+    }
+};
+*/
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
    // qInstallMsgHandler(customMessageHandler);
+//      myThread my;
     initPort();
      ui->sendButton->setEnabled(false);
         ui->openFill->setEnabled(false);
@@ -120,7 +146,7 @@ void MainWindow::on_clearButton_clicked()
           //设置波特率
           serial->setBaudRate(ui->BaudBox->currentText().toInt());
           //设置数据位数
-          serial->setBaudRate(9600);   //设置波特率
+          serial->setBaudRate(115200);   //设置波特率
           serial->setDataBits(QSerialPort::Data8);     //设置数据位
           serial->setStopBits(QSerialPort::OneStop);     //设置停止位
           serial->setParity(QSerialPort::NoParity);     //设置校验位
@@ -272,16 +298,58 @@ void MainWindow::on_clearButton_clicked()
    //
   //  qDebug()<<"file Path:"<<PathUp;
   }
+
+
+
+
+  class myThread:public QThread
+  {
+
+   public:
+      myThread(MainWindow * p )
+      {
+
+     mate=p;
+      }
+      void run()
+  {
+
+       int TxLen=0;
+        uint8_t TxData[1024+10]={0};
+        QByteArray Path=mate->PathUp.toLatin1();
+        Ymodem myYmdem;
+        myYmdem.getFilePath("123","456");
+
+        myYmdem.getFilePath(Path.data(),mate->fileName);
+        myYmdem.YmodeInfo(TxData,&TxLen);
+        mate->serial->write((char*)TxData,TxLen);
+        qDebug()<<"Send updata info over";
+
+  }
+
+private: MainWindow* mate;
+  };
   void MainWindow::upData()
  {
-        int TxLen=0;
+
+
+
+       myThread *thread=new  myThread(this);
+       connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+       thread->wait();
+       thread->start();
+
+    //  myThread my;
+    //  my.start();
+      /*
+      int TxLen=0;
         uint8_t TxData[1024+10]={0};
         QByteArray Path=PathUp.toLatin1();
         Ymodem myYmdem;
         myYmdem.getFilePath(Path.data(),this->fileName);
         myYmdem.YmodeInfo(TxData,&TxLen);
         serial->write((char*)TxData,TxLen);
-
+*/
   //     qDebug()<<"upData:"<<this->fileName;
       //  serial->write((char*)TxData,TxLen);
      /*   for(int i=0;i<TxLen;i++)
